@@ -111,6 +111,28 @@ class ConvolutionLayer : public Layer<Dtype> {
   Blob<Dtype> bias_multiplier_;
 };
 
+// Locally connected convolution layer
+template <typename Dtype>
+class LocalLayer : public ConvolutionLayer<Dtype> {
+ public:
+  explicit LocalLayer(const LayerParameter& param)
+      : ConvolutionLayer<Dtype>(param) {}
+  virtual void LayerSetUp(const vector<Blob<Dtype>*>& bottom,
+      vector<Blob<Dtype>*>* top);
+
+ protected:
+  virtual void Forward_gpu(const vector<Blob<Dtype>*>& bottom,
+      vector<Blob<Dtype>*>* top);
+  virtual void Backward_gpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, vector<Blob<Dtype>*>* bottom);
+  virtual void Forward_cpu(const vector<Blob<Dtype>*>& bottom,
+      vector<Blob<Dtype>*>* top);
+  virtual void Backward_cpu(const vector<Blob<Dtype>*>& top,
+      const vector<bool>& propagate_down, vector<Blob<Dtype>*>* bottom);
+  Blob<Dtype> all_ones_;
+  Blob<Dtype> temp_;
+};
+
 #ifdef USE_CUDNN
 /*
  * @brief cuDNN implementation of ConvolutionLayer.

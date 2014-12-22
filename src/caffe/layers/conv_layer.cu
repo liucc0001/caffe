@@ -34,10 +34,16 @@ void ConvolutionLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       }
       // Add bias.
       if (bias_term_) {
-        caffe_gpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, num_output_,
-            N_, 1, (Dtype)1., this->blobs_[1]->gpu_data(),
-            bias_multiplier_.gpu_data(),
-            (Dtype)1., top_data + (*top)[i]->offset(n));
+        if (this->layer_param_.convolution_param().shared_bias()) {
+          caffe_gpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, num_output_,
+              N_, 1, (Dtype)1., this->blobs_[1]->gpu_data(),
+              bias_multiplier_.gpu_data(),
+              (Dtype)1., top_data + (*top)[i]->offset(n));
+        } else {
+          caffe_gpu_add<Dtype>(this->blobs_[1]->count(),
+              (*top)[i]->gpu_data() + (*top)[i]->offset(n),
+              this->blobs_[1]->gpu_data(), top_data + (*top)[i]->offset(n));
+        }
       }
     }
   }
