@@ -131,6 +131,7 @@ class LocalLayer : public ConvolutionLayer<Dtype> {
       const vector<bool>& propagate_down, vector<Blob<Dtype>*>* bottom);
   Blob<Dtype> all_ones_;
   Blob<Dtype> temp_;
+  Blob<Dtype> temp2_;
 };
 
 #ifdef USE_CUDNN
